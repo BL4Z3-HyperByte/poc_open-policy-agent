@@ -4,10 +4,14 @@ import rego.v1
 
 default allow := false
 
-user_is_authorized if {
-	input.user.role == "power"
+fields contains ["id", "name", "price", "description", "edit_link"] if {
+	input.user_role == "power"
 }
 
-allow if {
-	user_is_authorized
+fields contains ["id", "name", "price", "description"] if {
+	input.user_role == "user"
+}
+
+fields contains ["id", "name", "description"] if {
+	input.user_role == "guest"
 }
