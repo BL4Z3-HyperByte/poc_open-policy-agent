@@ -29,7 +29,7 @@ async function productDetailsContoller(req, res, next) {
   console.log(req.url);
 
   const product = new Product(req.params.id);
-  console.log(product);
+  console.log('UNFILTERED: ', product);
   res.status(200).json({ product: req.filterData(product) });
   console.groupEnd();
 }
