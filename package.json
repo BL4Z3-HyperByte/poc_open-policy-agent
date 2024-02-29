@@ -1,0 +1,26 @@
+{
+  "name": "order-item-provider",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon app/server.js",
+    "start": "node app/server.js",
+    "swagger3toswagger2": "npx api-spec-converter --from=openapi_3 --to=swagger_2 --syntax=yaml --order=openapi --dummy swagger.yml > swagger_2.yml",
+    "test": "jest --detectOpenHandles",
+    "dredd": "npx dredd",
+    "pactflow:publish": "pactflow publish-provider-contract ./swagger.yml --provider node-api-dredd --provider-app-version 1.0.0 --branch dev --content-type application/yaml --verification-success --verification-results ./api-verification.md --verification-results-content-type text/plain --verifier dredd",
+    "validateAPI": "npm run dredd"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@faker-js/faker": "^8.3.1",
+    "@open-policy-agent/opa-wasm": "^1.8.1",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nanoid": "^3.0.0",
+    "nodemon": "^3.0.3",
+    "uuid": "^9.0.1"
+  }
+}
