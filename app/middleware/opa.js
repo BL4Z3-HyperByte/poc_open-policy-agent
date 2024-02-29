@@ -8,7 +8,7 @@ const path = require('path');
  * @param {import('express').Response} res
  * @param {Function} next
  */
-function PolicyGuard(req, res, next) {
+function PolicyGuard_Products(req, res, next) {
   const readPolicyFile = fs.readFileSync(
     path.join(__dirname, '..', 'policies', 'products', 'policy.wasm')
   );
@@ -18,56 +18,59 @@ function PolicyGuard(req, res, next) {
   console.log(loadedPolicyFile);
 
   const result = loadedPolicyFile.evaluate({
-    user: req.headers.user_role,
+    user_role: req.headers.user_role,
   });
 
   const resultData = result[0].result[0];
 
   console.log(resultData);
 
-  switch (resultData) {
-    case 'power':
-      console.log('ATTACHING POWER FILTER!...');
-      req.filterData = (obj) => {
-        const data = JSON.parse(obj);
-        return {
-          p1: data.id,
-          p2: data.name,
-          p3: data.price,
-          p4: data.description,
-        };
-      };
-      break;
-    case 'user':
-      console.log('ATTACHING USER FILTER!...');
-      req.filterData = (obj) => {
-        const data = JSON.parse(obj);
-        return {
-          p2: data.name,
-          p3: data.price,
-          p4: data.description,
-        };
-      };
-      break;
-    case 'guest':
-      console.log('ATTACHING GUEST FILTER!...');
-      req.filterData = (obj) => {
-        const data = JSON.parse(obj);
-        console.log(data);
-        return {
-          p2: data.name,
-          p3: data.price,
-        };
-      };
-      break;
-    default:
-      console.log('ATTACHING DEFAULT FILTER!...');
-      req.filterData = (data) => {
-        return data;
-      };
-      break;
-  }
+  req.filterData = (data) => {
+    const obj = {};
+    return data;
+  };
+
   next();
 }
 
-module.exports = PolicyGuard;
+/**
+ *
+ * @param {import('express').Request} req
+ * @param {import('express').Response} res
+ * @param {Function} next
+ */
+function PolicyGuard_Details(req, res, next) {
+  const readPolicyFile = fs.readFileSync(
+    path.join(__dirname, '..', 'policies', 'details', 'policy.wasm')
+  );
+  console.log(readPolicyFile);
+
+  const loadedPolicyFile = loadPolicySync(readPolicyFile);
+  console.log(loadedPolicyFile);
+
+  const result = loadedPolicyFile.evaluate({
+    user_role: req.headers.user_role,
+  });
+
+  /**
+   * @type {String[]}
+   */
+  const resultData = result[0].result[0];
+
+  console.log('ALLOWED PROPERTIES: ', resultData);
+
+  req.filterData = (data) => {
+    const obj = {};
+
+    resultData.forEach((property) => {
+      obj[property] = data[property];
+    });
+
+    console.log('OUTPUT OBJ >>> ', obj);
+    return obj;
+  };
+
+  next();
+}
+
+module.exports = { PolicyGuard_Details, PolicyGuard_Products };
